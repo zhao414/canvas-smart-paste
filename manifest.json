@@ -1,7 +1,7 @@
 {
   "id": "canvas-smart-paste",
   "name": "Canvas Smart Paste",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "minAppVersion": "1.5.0",
   "description": "Intelligently paste clipboard content into Canvas as nodes — single node, heading tree, list tree, or paragraphs with auto-detection.",
   "author": "zhao414",
