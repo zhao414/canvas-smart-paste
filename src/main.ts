@@ -43,7 +43,7 @@ export default class CanvasClipboardPastePlugin extends Plugin {
         const leaf = this.app.workspace.activeLeaf;
         if (!leaf) return false;
         if (leaf.view.getViewType() !== "canvas") return false;
-        if (!checking) this.handlePaste(leaf.view);
+        if (!checking) void this.handlePaste(leaf.view);
         return true;
       },
     });
@@ -55,7 +55,7 @@ export default class CanvasClipboardPastePlugin extends Plugin {
         const leaf = this.app.workspace.activeLeaf;
         if (!leaf) return false;
         if (leaf.view.getViewType() !== "canvas") return false;
-        if (!checking) this.handleHeadingTreePaste(leaf.view);
+        if (!checking) void this.handleHeadingTreePaste(leaf.view);
         return true;
       },
     });
@@ -67,7 +67,7 @@ export default class CanvasClipboardPastePlugin extends Plugin {
         const leaf = this.app.workspace.activeLeaf;
         if (!leaf) return false;
         if (leaf.view.getViewType() !== "canvas") return false;
-        if (!checking) this.handleListTreePaste(leaf.view);
+        if (!checking) void this.handleListTreePaste(leaf.view);
         return true;
       },
     });
@@ -79,7 +79,7 @@ export default class CanvasClipboardPastePlugin extends Plugin {
         const leaf = this.app.workspace.activeLeaf;
         if (!leaf) return false;
         if (leaf.view.getViewType() !== "canvas") return false;
-        if (!checking) this.handleAutoTreePaste(leaf.view);
+        if (!checking) void this.handleAutoTreePaste(leaf.view);
         return true;
       },
     });
@@ -91,7 +91,7 @@ export default class CanvasClipboardPastePlugin extends Plugin {
         const leaf = this.app.workspace.activeLeaf;
         if (!leaf) return false;
         if (leaf.view.getViewType() !== "canvas") return false;
-        if (!checking) this.handleParagraphPaste(leaf.view);
+        if (!checking) void this.handleParagraphPaste(leaf.view);
         return true;
       },
     });
@@ -233,11 +233,17 @@ class CanvasClipboardSettingTab extends PluginSettingTab {
     this.plugin = plugin;
   }
 
+  getSettingDefinitions() {
+    return [];
+  }
+
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
 
-    containerEl.createEl("h2", { text: "Canvas Clipboard Paste" });
+    new Setting(containerEl)
+      .setName("Canvas Clipboard Paste")
+      .setHeading();
 
     new Setting(containerEl)
       .setName("Edge direction")

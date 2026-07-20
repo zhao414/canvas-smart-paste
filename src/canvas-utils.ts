@@ -58,7 +58,7 @@ export async function readClipboard(): Promise<string | null> {
  * Falls back to 8px per character if measurement is unavailable.
  */
 function measureTextWidth(text: string): number {
-  const canvas = document.createElement("canvas");
+  const canvas = activeDocument.createElement("canvas");
   const ctx = canvas.getContext("2d");
   if (!ctx) return text.length * 8;
   // Match Obsidian canvas node text style
