@@ -1060,7 +1060,6 @@ function splitParagraphs(text: string, strict: boolean): string[] {
   return paragraphs;
 }
 
-const PARA_HEADING_RE = /^(#{1,6})\s+/;
 
 /**
  * Paste clipboard text as paragraphs. Heading paragraphs become

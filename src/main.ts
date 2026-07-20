@@ -1,4 +1,4 @@
-import { Plugin, Notice, PluginSettingTab, Setting } from "obsidian";
+import { Plugin, Notice, PluginSettingTab, Setting, View } from "obsidian";
 import {
   pasteToActiveCanvas,
   pasteHeadingTreeToCanvas,
@@ -40,10 +40,10 @@ export default class CanvasClipboardPastePlugin extends Plugin {
       id: "paste-clipboard-as-canvas-node",
       name: "Paste clipboard as a single canvas node",
       checkCallback: (checking: boolean) => {
-        const leaf = this.app.workspace.activeLeaf;
-        if (!leaf) return false;
-        if (leaf.view.getViewType() !== "canvas") return false;
-        if (!checking) void this.handlePaste(leaf.view);
+        const view = this.app.workspace.getActiveViewOfType(View);
+        if (!view) return false;
+        if (view.getViewType() !== "canvas") return false;
+        if (!checking) void this.handlePaste(view);
         return true;
       },
     });
@@ -52,10 +52,10 @@ export default class CanvasClipboardPastePlugin extends Plugin {
       id: "paste-clipboard-as-heading-tree",
       name: "Paste clipboard as heading tree",
       checkCallback: (checking: boolean) => {
-        const leaf = this.app.workspace.activeLeaf;
-        if (!leaf) return false;
-        if (leaf.view.getViewType() !== "canvas") return false;
-        if (!checking) void this.handleHeadingTreePaste(leaf.view);
+        const view = this.app.workspace.getActiveViewOfType(View);
+        if (!view) return false;
+        if (view.getViewType() !== "canvas") return false;
+        if (!checking) void this.handleHeadingTreePaste(view);
         return true;
       },
     });
@@ -64,10 +64,10 @@ export default class CanvasClipboardPastePlugin extends Plugin {
       id: "paste-clipboard-as-list-tree",
       name: "Paste clipboard as list tree",
       checkCallback: (checking: boolean) => {
-        const leaf = this.app.workspace.activeLeaf;
-        if (!leaf) return false;
-        if (leaf.view.getViewType() !== "canvas") return false;
-        if (!checking) void this.handleListTreePaste(leaf.view);
+        const view = this.app.workspace.getActiveViewOfType(View);
+        if (!view) return false;
+        if (view.getViewType() !== "canvas") return false;
+        if (!checking) void this.handleListTreePaste(view);
         return true;
       },
     });
@@ -76,10 +76,10 @@ export default class CanvasClipboardPastePlugin extends Plugin {
       id: "paste-clipboard-as-tree",
       name: "Paste clipboard as tree",
       checkCallback: (checking: boolean) => {
-        const leaf = this.app.workspace.activeLeaf;
-        if (!leaf) return false;
-        if (leaf.view.getViewType() !== "canvas") return false;
-        if (!checking) void this.handleAutoTreePaste(leaf.view);
+        const view = this.app.workspace.getActiveViewOfType(View);
+        if (!view) return false;
+        if (view.getViewType() !== "canvas") return false;
+        if (!checking) void this.handleAutoTreePaste(view);
         return true;
       },
     });
@@ -88,10 +88,10 @@ export default class CanvasClipboardPastePlugin extends Plugin {
       id: "paste-clipboard-as-paragraphs",
       name: "Paste clipboard as paragraphs",
       checkCallback: (checking: boolean) => {
-        const leaf = this.app.workspace.activeLeaf;
-        if (!leaf) return false;
-        if (leaf.view.getViewType() !== "canvas") return false;
-        if (!checking) void this.handleParagraphPaste(leaf.view);
+        const view = this.app.workspace.getActiveViewOfType(View);
+        if (!view) return false;
+        if (view.getViewType() !== "canvas") return false;
+        if (!checking) void this.handleParagraphPaste(view);
         return true;
       },
     });
