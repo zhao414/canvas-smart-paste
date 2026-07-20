@@ -4,3 +4,5 @@ main.js
 *.log
 .DS_Store
 Thumbs.db
+AGENTS.md
+reasonix.toml
