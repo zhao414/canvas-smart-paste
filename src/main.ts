@@ -242,7 +242,7 @@ class CanvasClipboardSettingTab extends PluginSettingTab {
     containerEl.empty();
 
     new Setting(containerEl)
-      .setName("Canvas Clipboard Paste")
+      .setName("Canvas Smart Paste")
       .setHeading();
 
     new Setting(containerEl)
