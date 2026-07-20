@@ -151,11 +151,17 @@ function isLatexSingleLine(line: string): boolean {
   return idx + 2 === rest.length;
 }
 
+/** True when a line contains $$ anywhere (including at the end). Used to close multi-line LaTeX blocks. */
+function lineContainsDollars(line: string): boolean {
+  return /\$\$(?!\$)/.test(line.trim());
+}
+
 /** Check whether a text block contains any ATX-style headings. */
 export function containsHeadings(text: string): boolean {
   let inCode = false;
   let inLatex = false;
   for (const line of text.split("\n")) {
+    if (inLatex && lineContainsDollars(line)) { inLatex = false; continue; }
     if (!inCode && isLatexOpen(line)) {
       if (inLatex) { inLatex = false; continue; }
       if (isLatexSingleLine(line)) continue;
@@ -175,6 +181,7 @@ export function isOnlyList(text: string): boolean {
   let inCode = false;
   let inLatex = false;
   for (const line of text.split("\n")) {
+    if (inLatex && lineContainsDollars(line)) { inLatex = false; continue; }
     if (!inCode && isLatexOpen(line)) {
       if (inLatex) { inLatex = false; continue; }
       if (isLatexSingleLine(line)) continue;
@@ -220,6 +227,7 @@ export function parseHeadingSections(text: string): HeadingParseResult {
   }
 
   for (const line of lines) {
+    if (inLatex && lineContainsDollars(line)) { inLatex = false; currentLines.push(line); continue; }
     if (!inCode && isLatexOpen(line)) {
       if (inLatex) { inLatex = false; currentLines.push(line); continue; }
       if (isLatexSingleLine(line)) { currentLines.push(line); continue; }
@@ -308,6 +316,12 @@ export function parseListItems(text: string): HeadingParseResult {
   }
 
   for (const line of lines) {
+    if (inLatex && lineContainsDollars(line)) {
+      inLatex = false;
+      if (currentIndent >= 0) currentLines.push(line);
+      else preambleLines.push(line);
+      continue;
+    }
     if (!inCode && isLatexOpen(line)) {
       if (inLatex) {
         inLatex = false;
@@ -976,6 +990,7 @@ function splitParagraphs(text: string, strict: boolean): string[] {
     const empty = line.trim() === "";
 
     // LaTeX block: collect everything until closing $$
+    if (inLatex && lineContainsDollars(line)) { current.push(i); flush(); inLatex = false; continue; }
     if (!inCode && isLatexOpen(line)) {
       if (inLatex) {
         current.push(i);
