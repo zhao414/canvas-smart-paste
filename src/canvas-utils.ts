@@ -156,7 +156,7 @@ export function containsHeadings(text: string): boolean {
   let inCode = false;
   let inLatex = false;
   for (const line of text.split("\n")) {
-    if (isLatexOpen(line)) {
+    if (!inCode && isLatexOpen(line)) {
       if (inLatex) { inLatex = false; continue; }
       if (isLatexSingleLine(line)) continue;
       inLatex = true; continue;
@@ -175,7 +175,7 @@ export function isOnlyList(text: string): boolean {
   let inCode = false;
   let inLatex = false;
   for (const line of text.split("\n")) {
-    if (isLatexOpen(line)) {
+    if (!inCode && isLatexOpen(line)) {
       if (inLatex) { inLatex = false; continue; }
       if (isLatexSingleLine(line)) continue;
       inLatex = true; continue;
@@ -220,7 +220,7 @@ export function parseHeadingSections(text: string): HeadingParseResult {
   }
 
   for (const line of lines) {
-    if (isLatexOpen(line)) {
+    if (!inCode && isLatexOpen(line)) {
       if (inLatex) { inLatex = false; currentLines.push(line); continue; }
       if (isLatexSingleLine(line)) { currentLines.push(line); continue; }
       inLatex = true; currentLines.push(line); continue;
@@ -308,7 +308,7 @@ export function parseListItems(text: string): HeadingParseResult {
   }
 
   for (const line of lines) {
-    if (isLatexOpen(line)) {
+    if (!inCode && isLatexOpen(line)) {
       if (inLatex) {
         inLatex = false;
         if (currentIndent >= 0) currentLines.push(line);
@@ -976,7 +976,7 @@ function splitParagraphs(text: string, strict: boolean): string[] {
     const empty = line.trim() === "";
 
     // LaTeX block: collect everything until closing $$
-    if (isLatexOpen(line)) {
+    if (!inCode && isLatexOpen(line)) {
       if (inLatex) {
         current.push(i);
         flush();
