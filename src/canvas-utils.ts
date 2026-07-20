@@ -131,15 +131,58 @@ export interface HeadingParseResult {
 
 const HEADING_RE = /^(#{1,6})\s+(.+)/;
 
+/** Detect a fenced code block boundary (```...). */
+function isFence(line: string): boolean {
+  return /^```/.test(line.trim());
+}
+
+/** Check whether a line starts with $$ (but not $$$...). */
+function isLatexOpen(line: string): boolean {
+  return /^\$\$(?!\$)/.test(line.trim());
+}
+
+/** True when a line starts with $$ and has a closing $$ at the very end. */
+function isLatexSingleLine(line: string): boolean {
+  const t = line.trim();
+  if (!/^\$\$(?!\$)/.test(t)) return false;
+  const rest = t.substring(2);
+  const idx = rest.indexOf("$$");
+  if (idx === -1) return false;
+  return idx + 2 === rest.length;
+}
+
 /** Check whether a text block contains any ATX-style headings. */
 export function containsHeadings(text: string): boolean {
-  return /^#{1,6}\s+/m.test(text);
+  let inCode = false;
+  let inLatex = false;
+  for (const line of text.split("\n")) {
+    if (!inCode && isLatexOpen(line)) {
+      if (inLatex) { inLatex = false; continue; }
+      if (isLatexSingleLine(line)) continue;
+      inLatex = true; continue;
+    }
+    if (inLatex) continue;
+    if (isFence(line)) { inCode = !inCode; continue; }
+    if (inCode) continue;
+    if (/^#{1,6}\s+/m.test(line)) return true;
+  }
+  return false;
 }
 
 /** Check whether every non-blank line is a list item (bullet or numbered). */
 export function isOnlyList(text: string): boolean {
   let hasListItem = false;
+  let inCode = false;
+  let inLatex = false;
   for (const line of text.split("\n")) {
+    if (!inCode && isLatexOpen(line)) {
+      if (inLatex) { inLatex = false; continue; }
+      if (isLatexSingleLine(line)) continue;
+      inLatex = true; continue;
+    }
+    if (inLatex) continue;
+    if (isFence(line)) { inCode = !inCode; continue; }
+    if (inCode) continue;
     if (line.trim() === "") continue;
     if (/^\s*[-*+]\s+/.test(line) || /^\s*\d+[.)]\s+/.test(line)) {
       hasListItem = true;
@@ -161,6 +204,8 @@ export function parseHeadingSections(text: string): HeadingParseResult {
   let currentLines: string[] = [];
   let currentLevel = 0;
   let currentHeading = "";
+  let inCode = false;
+  let inLatex = false;
 
   function flush() {
     const content = currentLines.join("\n").trimEnd();
@@ -175,6 +220,14 @@ export function parseHeadingSections(text: string): HeadingParseResult {
   }
 
   for (const line of lines) {
+    if (!inCode && isLatexOpen(line)) {
+      if (inLatex) { inLatex = false; currentLines.push(line); continue; }
+      if (isLatexSingleLine(line)) { currentLines.push(line); continue; }
+      inLatex = true; currentLines.push(line); continue;
+    }
+    if (inLatex) { currentLines.push(line); continue; }
+    if (isFence(line)) { inCode = !inCode; currentLines.push(line); continue; }
+    if (inCode) { currentLines.push(line); continue; }
     const m = HEADING_RE.exec(line);
     if (m) {
       const newLevel = m[1].length;
@@ -232,6 +285,8 @@ export function parseListItems(text: string): HeadingParseResult {
   let currentIndent = -1; // -1 = not inside a list item
   let currentHeading = "";
   const preambleLines: string[] = []; // non-list lines before first list item
+  let inCode = false;
+  let inLatex = false;
 
   function flush() {
     const content = currentLines.join("\n").trimEnd();
@@ -253,6 +308,39 @@ export function parseListItems(text: string): HeadingParseResult {
   }
 
   for (const line of lines) {
+    if (!inCode && isLatexOpen(line)) {
+      if (inLatex) {
+        inLatex = false;
+        if (currentIndent >= 0) currentLines.push(line);
+        else preambleLines.push(line);
+        continue;
+      }
+      if (isLatexSingleLine(line)) {
+        if (currentIndent >= 0) currentLines.push(line);
+        else preambleLines.push(line);
+        continue;
+      }
+      inLatex = true;
+      if (currentIndent >= 0) currentLines.push(line);
+      else preambleLines.push(line);
+      continue;
+    }
+    if (inLatex) {
+      if (currentIndent >= 0) currentLines.push(line);
+      else preambleLines.push(line);
+      continue;
+    }
+    if (isFence(line)) {
+      inCode = !inCode;
+      if (currentIndent >= 0) currentLines.push(line);
+      else preambleLines.push(line);
+      continue;
+    }
+    if (inCode) {
+      if (currentIndent >= 0) currentLines.push(line);
+      else preambleLines.push(line);
+      continue;
+    }
     const m = LIST_RE.exec(line);
     if (m) {
       const indent = m[1].length;
@@ -870,6 +958,8 @@ function splitParagraphs(text: string, strict: boolean): string[] {
   const paragraphs: string[] = [];
   const current: number[] = [];
   let inList = false;
+  let inCode = false;
+  let inLatex = false;
 
   const isListItem = (line: string) =>
     /^\s*[-*+]\s+/.test(line) || /^\s*\d+[.)]\s+/.test(line);
@@ -884,6 +974,41 @@ function splitParagraphs(text: string, strict: boolean): string[] {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const empty = line.trim() === "";
+
+    // LaTeX block: collect everything until closing $$
+    if (!inCode && isLatexOpen(line)) {
+      if (inLatex) {
+        current.push(i);
+        flush();
+        inLatex = false;
+        continue;
+      }
+      if (isLatexSingleLine(line)) { current.push(i); flush(); continue; }
+      if (current.length > 0) flush();
+      inLatex = true;
+      current.push(i);
+      continue;
+    }
+    if (inLatex) { current.push(i); continue; }
+
+    // Code block: collect everything until closing fence
+    if (isFence(line)) {
+      if (inCode) {
+        current.push(i);
+        flush();
+        inCode = false;
+        continue;
+      }
+      if (current.length > 0) flush();
+      inCode = true;
+      current.push(i);
+      continue;
+    }
+
+    if (inCode) {
+      current.push(i);
+      continue;
+    }
 
     if (isListItem(line)) {
       if (!inList && current.length > 0) flush();
