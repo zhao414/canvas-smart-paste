@@ -1,0 +1,2 @@
+[permissions]
+allow = ["explore", "Bash(cd D:/Develop/OBTools/canvasHelper && npm run build)"]

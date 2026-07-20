@@ -1,0 +1,10 @@
+{
+  "id": "canvas-clipboard-paste",
+  "name": "Canvas Clipboard Paste",
+  "version": "1.0.0",
+  "minAppVersion": "1.5.0",
+  "description": "Paste clipboard content as a new text node in the active canvas.",
+  "author": "zhao414",
+  "authorUrl": "https://github.com/zhao414",
+  "isDesktopOnly": false
+}

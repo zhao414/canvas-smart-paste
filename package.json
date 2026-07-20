@@ -1,0 +1,19 @@
+{
+  "name": "canvas-clipboard-paste",
+  "version": "1.0.0",
+  "description": "Paste clipboard content as canvas node",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node esbuild.config.mjs",
+    "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20",
+    "esbuild": "^0.17",
+    "obsidian": "latest",
+    "typescript": "^5.3"
+  }
+}
