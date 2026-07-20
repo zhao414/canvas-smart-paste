@@ -40,6 +40,14 @@ cp -r canvas-smart-paste /path/to/vault/.obsidian/plugins/
 zhao414/canvas-smart-paste
 ```
 
+## Support
+
+If this plugin makes your daily life with Obsidian easier, consider buying me a coffee.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I3E121X4Y7)
+
+May the passion be with you!
+
 ## License
 
 MIT
@@ -87,6 +95,14 @@ cp -r canvas-smart-paste /path/to/vault/.obsidian/plugins/
 ```
 zhao414/canvas-smart-paste
 ```
+
+## Support
+
+如果这个插件让你的 Obsidian 日常使用更顺手，不妨请我喝杯咖啡 ☕
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I3E121X4Y7)
+
+愿原力与你同在！
 
 ## License
 
