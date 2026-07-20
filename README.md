@@ -102,7 +102,7 @@ zhao414/canvas-smart-paste
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/I3E121X4Y7)
 
-愿原力与你同在！
+好好学习，天天向上！
 
 ## License
 
