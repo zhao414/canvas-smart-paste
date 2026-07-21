@@ -1,6 +1,6 @@
 {
   "name": "canvas-smart-paste",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Intelligently paste clipboard content into Obsidian Canvas as nodes",
   "main": "main.js",
   "scripts": {
