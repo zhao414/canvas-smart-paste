@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Generate source archives
+        run: |
+          VERSION="${GITHUB_REF_NAME}"
+          git archive --format=zip --prefix=canvas-smart-paste-${VERSION}/ "${VERSION}" -o source.zip
+          git archive --format=tar.gz --prefix=canvas-smart-paste-${VERSION}/ "${VERSION}" -o source.tar.gz
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            main.js
+            styles.css
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          files: |
+            main.js
+            manifest.json
+            styles.css
+            source.zip
+            source.tar.gz
+          generate_release_notes: true
