@@ -953,21 +953,56 @@ export async function pasteListTreeToCanvas(
 
 // ─── Paragraph paste ─────────────────────────────────────────
 
+/** How the paragraphs command decides where a node ends. */
+export type ParagraphBreakMode = "follow" | "blank-lines-only" | "every-line";
+
 /**
- * Read Obsidian's "Strict line breaks" editor setting.
+ * Read Obsidian's own "Strict line breaks" editor setting.
+ *
+ * Returns true when Obsidian ignores single line breaks in reading view,
+ * which means only a blank line starts a new paragraph.
  */
-function isStrictLineBreaks(app: App): boolean {
+function obsidianSplitsOnBlankLines(app: App): boolean {
   try {
-    return !!(app.vault as any).getConfig?.("strictLineBreaks");
+    // "strictLineBreaks" is Obsidian's own config key; true means it
+    // follows the Markdown spec and ignores single line breaks.
+    const obsidianValue = (app.vault as any).getConfig?.("strictLineBreaks");
+    return obsidianValue === undefined ? true : !!obsidianValue;
   } catch {
-    return false;
+    return true;
+  }
+}
+
+/**
+ * Resolve the configured mode into a single decision:
+ * true  → only blank lines split paragraphs (single line breaks stay in one node)
+ * false → every single line break starts a new paragraph
+ */
+export function resolveBlankLineSplit(
+  app: App,
+  mode: ParagraphBreakMode,
+): boolean {
+  switch (mode) {
+    case "blank-lines-only":
+      return true;
+    case "every-line":
+      return false;
+    case "follow":
+    default:
+      return obsidianSplitsOnBlankLines(app);
   }
 }
 
 /**
  * Split text into paragraphs, treating contiguous list items as one paragraph.
+ *
+ * @param splitOnBlankLinesOnly true  → only an empty line ends a paragraph;
+ *                              false → every single line break ends a paragraph.
  */
-function splitParagraphs(text: string, strict: boolean): string[] {
+function splitParagraphs(
+  text: string,
+  splitOnBlankLinesOnly: boolean,
+): string[] {
   const lines = text.split("\n");
   const paragraphs: string[] = [];
   const current: number[] = [];
@@ -998,7 +1033,12 @@ function splitParagraphs(text: string, strict: boolean): string[] {
         inLatex = false;
         continue;
       }
-      if (isLatexSingleLine(line)) { current.push(i); flush(); continue; }
+      if (isLatexSingleLine(line)) {
+        if (current.length > 0) flush();
+        current.push(i);
+        flush();
+        continue;
+      }
       if (current.length > 0) flush();
       inLatex = true;
       current.push(i);
@@ -1052,7 +1092,7 @@ function splitParagraphs(text: string, strict: boolean): string[] {
     if (empty) {
       flush();
     } else {
-      if (strict && current.length > 0) flush();
+      if (!splitOnBlankLinesOnly && current.length > 0) flush();
       current.push(i);
     }
   }
@@ -1073,14 +1113,15 @@ export async function pasteParagraphsToCanvas(
   autoResize: boolean = true,
   direction: EdgeDirection = "tb",
   createEdges: boolean = true,
+  paragraphBreakMode: ParagraphBreakMode = "follow",
 ): Promise<PasteResult> {
   const file: TFile | undefined = canvasView.file;
   if (!file) {
     return { success: false, message: "Could not determine the canvas file." };
   }
 
-  const strict = isStrictLineBreaks(app);
-  const paragraphs = splitParagraphs(text, strict);
+  const splitOnBlankLinesOnly = resolveBlankLineSplit(app, paragraphBreakMode);
+  const paragraphs = splitParagraphs(text, splitOnBlankLinesOnly);
   if (paragraphs.length === 0) {
     return { success: false, message: "No paragraphs found in clipboard." };
   }

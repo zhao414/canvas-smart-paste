@@ -8,6 +8,7 @@ import {
   containsHeadings,
   isOnlyList,
   type EdgeDirection,
+  type ParagraphBreakMode,
 } from "./canvas-utils";
 
 // ─── Settings ────────────────────────────────────────────────────
@@ -17,6 +18,7 @@ export interface CanvasClipboardSettings {
   autoResize: boolean;
   createEdges: boolean;
   keepListNumbering: boolean;
+  paragraphBreakMode: ParagraphBreakMode;
 }
 
 export const DEFAULT_SETTINGS: CanvasClipboardSettings = {
@@ -24,6 +26,7 @@ export const DEFAULT_SETTINGS: CanvasClipboardSettings = {
   autoResize: true,
   createEdges: true,
   keepListNumbering: true,
+  paragraphBreakMode: "follow",
 };
 
 // ─── Plugin ──────────────────────────────────────────────────────
@@ -195,6 +198,7 @@ export default class CanvasClipboardPastePlugin extends Plugin {
         this.settings.autoResize,
         this.settings.edgeDirection,
         this.settings.createEdges,
+        this.settings.paragraphBreakMode,
       );
     }
 
@@ -214,6 +218,7 @@ export default class CanvasClipboardPastePlugin extends Plugin {
     const result = await pasteParagraphsToCanvas(
       this.app, canvasView, text, this.settings.autoResize,
       this.settings.edgeDirection, this.settings.createEdges,
+      this.settings.paragraphBreakMode,
     );
     if (result.success) {
       new Notice(result.message);
@@ -285,6 +290,26 @@ class CanvasClipboardSettingTab extends PluginSettingTab {
           .setValue(this.plugin.settings.keepListNumbering)
           .onChange(async (value) => {
             this.plugin.settings.keepListNumbering = value;
+            await this.plugin.saveSettings();
+          }),
+      );
+
+    new Setting(containerEl)
+      .setName("Paragraph separation")
+      .setDesc(
+        "How 'Paste clipboard as paragraphs' splits nodes. " +
+        "\"Blank lines only\": single line breaks stay inside one node, only an empty line starts a new node. " +
+        "\"Every line\": every line break starts a new node. " +
+        "\"Follow Obsidian's \\\"Strict line breaks\\\"\": behave like that editor setting — when it is on, only blank lines split paragraphs; when it is off, every single line break does.",
+      )
+      .addDropdown((dropdown) =>
+        dropdown
+          .addOption("follow", "Follow Obsidian's \"Strict line breaks\"")
+          .addOption("blank-lines-only", "Blank lines only")
+          .addOption("every-line", "Every line")
+          .setValue(this.plugin.settings.paragraphBreakMode)
+          .onChange(async (value) => {
+            this.plugin.settings.paragraphBreakMode = value as ParagraphBreakMode;
             await this.plugin.saveSettings();
           }),
       );

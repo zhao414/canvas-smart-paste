@@ -17,6 +17,7 @@ An Obsidian plugin that intelligently pastes clipboard content into Canvas as no
 - **Edge direction** — Connection direction: top→bottom / left→right
 - **Create edges** — Whether to draw arrow connections (heading tree, list tree, paragraphs)
 - **Keep list numbering** — Whether to keep number prefix for ordered lists
+- **Paragraph separation** — How paragraph paste splits nodes: `Blank lines only` (single line breaks stay inside one node), `Every line` (every line break starts a new node), or `Follow Obsidian's "Strict line breaks"` (blank lines only when that Obsidian setting is on, every line break when it is off)
 - **Auto-resize nodes** — Whether nodes auto-adjust height to fit content
 
 ## Usage
@@ -73,6 +74,7 @@ Obsidian 插件：智能粘贴剪贴板内容到 Canvas。
 - **Edge direction** — 连接方向：上→下 / 左→右
 - **Create edges** — 是否画箭头连接
 - **Keep list numbering** — 编号列表是否保留序号
+- **Paragraph separation** — 段落粘贴的分段方式：`Blank lines only`（单换行留在同一节点）、`Every line`（每个换行各自成节点）、`Follow Obsidian's "Strict line breaks"`（跟随 Obsidian 该开关：开启时仅空行分段，关闭时单换行也分段）
 - **Auto-resize nodes** — 节点是否自动调整高度
 
 ## 用法
